@@ -1,16 +1,14 @@
 import getopt
+import subprocess
 import sys
 import requests
 import os
+
 
 def get_group(base_url, token_segment, namespace):
     final_url = base_url + 'groups?' + token_segment + "search=" + namespace
     r = requests.get(final_url)
     results = r.json()
-    
-    if not results:
-        print("Group " + namespace + " not found.")
-        return
     
     i = 0
     if len(results) > 1:
@@ -19,8 +17,36 @@ def get_group(base_url, token_segment, namespace):
             print("\t" + str(i) + ') '  + result['web_url'])
     
         i = int(input())
+    
+    group = None if not results else results[i]
 
-    return results[i]
+    return group 
+
+
+def clone_group(base_url, token_segment, group, parent_dir="."):
+    subgroups_url = base_url + "groups/" + str(group['id']) + "/subgroups?" + token_segment
+    projects_url = base_url + "groups/" + str(group['id']) + "/projects?" + token_segment
+    
+    subgroups = requests.get(subgroups_url).json()
+    projects = requests.get(projects_url).json()
+    working_dir = parent_dir + '/' + group['name']
+
+    if not os.path.exists(working_dir):
+        os.mkdir(working_dir)
+
+    for project in projects:
+        project_dir = working_dir + '/' + project['name']
+
+        if os.path.exists(project_dir):
+            print("\nEntering project " + project['name'])
+            p = subprocess.Popen(['git', 'pull'], cwd=project_dir)
+        else:
+            p = subprocess.Popen(['git', 'clone', project['http_url_to_repo']], cwd=working_dir)
+        p.wait()
+
+    for subgroup in subgroups:
+        print("\nEntering group " + subgroup['name'])
+        clone_group(base_url, token_segment, subgroup, working_dir)
 
 
 def main(argv):
@@ -50,12 +76,13 @@ def main(argv):
     namespace = args[0]
     
     group = get_group(base_url, token_segment, namespace)
-    print(group)    
+    
+    if not group:
+        print("Group " + namespace + " not found.")
+        return
     
     clone_group(base_url, token_segment, group)
 
-    
-    
 
 if __name__ == "__main__":
     main(sys.argv[1:])
