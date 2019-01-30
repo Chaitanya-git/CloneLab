@@ -29,6 +29,17 @@ To clone public repositories:
 ```bash
 clonelab <namespace search string> [optional parameters for git]
 ```
+The following arguments are supported by clonelab:
+
+| Short Options | Long Options | Description |
+| ------------- | ------------ | ----------- |
+| -t | --token | Provide a private access token to allow access to private repositories |
+| -d | --dir | Specify a working directory to clone the group into |
+| -h | --help | Display a help message |
+
+*Note:* Long options that require areguments are used with an '=' sign.
+eg: --dir=/home/user/repo
+
 If multiple groups matching the search string are found, clonelab will list all possible options and wait for the user to enter the option to select the required repository.
 
 Any flag or argument not recognized by clonelab will be passed along to git when clonelab either clones repos or pulls updates inside the git repos. Currently options unique to either ```git clone``` or ```git pull``` are not supported when updating partially cloned subgroups.

@@ -6,9 +6,10 @@ import requests
 import os
 
 def print_usage():
-    print("""Usage: clonelab <namspace search string>
+    print("""Usage: clonelab [Optional parameters] <namspace search string> [git parameters]
             Optional parameters:
                 --token=    -t      Specify access token to access private repositories
+                --dir=      -d      Specify a different working directory to clone into
                 --help      -h      Print this usage help
             Options not recognized by clonelab will be passed on to git 
             """)
