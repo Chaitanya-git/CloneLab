@@ -10,6 +10,7 @@ def print_usage():
             Optional parameters:
                 --token=    -t      Specify access token to access private repositories
                 --help      -h      Print this usage help
+            Options not recognized by clonelab will be passed on to git 
             """)
 
 def get_group(base_url, token_segment, namespace):
@@ -30,7 +31,7 @@ def get_group(base_url, token_segment, namespace):
     return group 
 
 
-def clone_group(base_url, token_segment, group, parent_dir="."):
+def clone_group(base_url, token_segment, group, git_options, parent_dir="."):
     subgroups_url = base_url + "groups/" + str(group['id']) + "/subgroups?" + token_segment
     projects_url = base_url + "groups/" + str(group['id']) + "/projects?" + token_segment
     
@@ -46,14 +47,14 @@ def clone_group(base_url, token_segment, group, parent_dir="."):
 
         if os.path.exists(project_dir):
             print("\nEntering project " + project['name'])
-            p = subprocess.Popen(['git', 'pull'], cwd=project_dir)
+            p = subprocess.Popen(['git', 'pull']+git_options, cwd=project_dir)
         else:
-            p = subprocess.Popen(['git', 'clone', project['http_url_to_repo']], cwd=working_dir)
+            p = subprocess.Popen(['git', 'clone', project['http_url_to_repo']]+git_options, cwd=working_dir)
         p.wait()
 
     for subgroup in subgroups:
         print("\nEntering group " + subgroup['name'])
-        clone_group(base_url, token_segment, subgroup, working_dir)
+        clone_group(base_url, token_segment, subgroup, git_options,  working_dir)
 
 
 def main(argv):
@@ -65,6 +66,7 @@ def main(argv):
         print("Error:" + str(err))
     
     access_token = None
+    git_options = []
     base_url =  'https://gitlab.com/api/v4/'
     for opt, arg in opts:
         if opt == '-h' or opt == '--help':
@@ -72,6 +74,8 @@ def main(argv):
             return
         elif opt == '-t' or opt == '--token':
             access_token = arg
+        else:
+            git_options.extend([opt,  arg])
 
     if not args:
         print("Group namespace not provided. Exiting...")
@@ -89,7 +93,7 @@ def main(argv):
         print("Group " + namespace + " not found.")
         return
     
-    clone_group(base_url, token_segment, group)
+    clone_group(base_url, token_segment, group, git_options)
 
 
 if __name__ == "__main__":
