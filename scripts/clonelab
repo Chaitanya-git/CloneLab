@@ -61,19 +61,22 @@ def main(argv):
     opts = []
     args = []
     try:
-        opts, args = getopt.getopt(argv, "ht:", ["help", "token"])
+        opts, args = getopt.getopt(argv, "ht:d:", ["help", "token=", "dir="])
     except getopt.GetoptError as err:
         print("Error:" + str(err))
     
     access_token = None
     git_options = []
     base_url =  'https://gitlab.com/api/v4/'
+    working_dir = "."
     for opt, arg in opts:
         if opt == '-h' or opt == '--help':
             print_usage()
             return
         elif opt == '-t' or opt == '--token':
             access_token = arg
+        elif opt == '-d' or opt == '--dir':
+            working_dir = os.path.abspath(arg) if arg[0] != '~' else os.path.expanduser(arg)
         else:
             git_options.extend([opt,  arg])
 
@@ -93,7 +96,8 @@ def main(argv):
         print("Group " + namespace + " not found.")
         return
     
-    clone_group(base_url, token_segment, group, git_options)
+    
+    clone_group(base_url, token_segment, group, git_options, working_dir)
 
 
 if __name__ == "__main__":

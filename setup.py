@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="clonelab-chaitanya",
-    version="0.0.1",
+    version="0.0.2",
     author="Chaitanya",
     author_email="chaitanya2.1999@gmail.com",
     description="A python utility to clone groups and subgroups from gitlab",
