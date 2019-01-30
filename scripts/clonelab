@@ -5,6 +5,13 @@ import sys
 import requests
 import os
 
+def print_usage():
+    print("""Usage: clonelab <namspace search string>
+            Optional parameters:
+                --token=    -t      Specify access token to access private repositories
+                --help      -h      Print this usage help
+            """)
+
 def get_group(base_url, token_segment, namespace):
     final_url = base_url + 'groups?' + token_segment + "search=" + namespace
     r = requests.get(final_url)
@@ -62,6 +69,7 @@ def main(argv):
     for opt, arg in opts:
         if opt == '-h' or opt == '--help':
             print_usage()
+            return
         elif opt == '-t' or opt == '--token':
             access_token = arg
 
