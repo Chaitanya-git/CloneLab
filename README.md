@@ -15,7 +15,7 @@ python3 setup.py sdist bdist_wheel
 This puts the built wheel package in the ```dist``` folder.
 Finally, install the wheel package using pip
 ```bash
-pip3 install --user dist/clonelab-0.0.1-py3-none-any.whl
+pip3 install --user dist/clonelab-0.0.2-py3-none-any.whl
 ```
 This should install the clonelab script in the ```.local/bin``` folder inside of your home folder. To be able to run clonelab from other directories, append ```~/.local/bin``` to your ```$PATH``` variable.
 
@@ -37,7 +37,7 @@ The following arguments are supported by clonelab:
 | -d | --dir | Specify a working directory to clone the group into |
 | -h | --help | Display a help message |
 
-*Note:* Long options that require areguments are used with an '=' sign.
+*Note:* Long options that require arguments are used with an '=' sign.
 eg: --dir=/home/user/repo
 
 If multiple groups matching the search string are found, clonelab will list all possible options and wait for the user to enter the option to select the required repository.

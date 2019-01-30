@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="clonelab-chaitanya",
+    name="clonelab",
     version="0.0.2",
     author="Chaitanya",
     author_email="chaitanya2.1999@gmail.com",
