@@ -29,7 +29,7 @@ To clone public repositories:
 ```bash
 clonelab <namespace search string> [optional parameters for git]
 ```
-If multiple groups matching the search string are found, cloneLab will list all possible options and wait for the user to enter the option to select the required repository.
+If multiple groups matching the search string are found, clonelab will list all possible options and wait for the user to enter the option to select the required repository.
 
 Any flag or argument not recognized by clonelab will be passed along to git when clonelab either clones repos or pulls updates inside the git repos. Currently options unique to either ```git clone``` or ```git pull``` are not supported when updating partially cloned subgroups.
 
