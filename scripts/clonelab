@@ -1,9 +1,9 @@
+#!/usr/bin/python
 import getopt
 import subprocess
 import sys
 import requests
 import os
-
 
 def get_group(base_url, token_segment, namespace):
     final_url = base_url + 'groups?' + token_segment + "search=" + namespace
