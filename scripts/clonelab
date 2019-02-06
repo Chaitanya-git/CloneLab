@@ -89,12 +89,14 @@ def main(argv):
     if access_token is not None:
         token_segment = "private_token=" + access_token + "&"
 
-    namespace = args[0]
+    search_string = args[0]
+    search_terms = search_string.split('/')
+    search_string = ' '.join(search_terms).strip()
     
-    group = get_group(base_url, token_segment, namespace)
+    group = get_group(base_url, token_segment, search_string)
     
     if not group:
-        print("Group " + namespace + " not found.")
+        print("Group " + args[0] + " not found.")
         return
     
     

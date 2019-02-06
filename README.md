@@ -17,7 +17,7 @@ python3 setup.py sdist bdist_wheel
 This puts the built wheel package in the ```dist``` folder.
 Finally, install the wheel package using pip
 ```bash
-pip3 install --user dist/clonelab-0.0.2-py3-none-any.whl
+pip3 install --user dist/clonelab-0.0.3-py3-none-any.whl
 ```
 This should install the clonelab script in the ```.local/bin``` folder inside of your home folder. To be able to run clonelab from other directories, append ```~/.local/bin``` to your ```$PATH``` variable.
 To do so, run:
@@ -47,7 +47,7 @@ MainGroupB
     - SubgroupA
     - SubgroupD
 ```
-Then, valid namespace search strings for ```SubgroupA``` would be either "SubgroupA" or "MainGroupA SubgroupA"
+Then, valid namespace search strings for ```SubgroupA``` would be either "SubgroupA" or "MainGroupA SubgroupA" or "MainGroupA/SubgroupA".
 If multiple groups matching the search string are found, clonelab will list all possible options and wait for the user to enter the option to select the required repository/group.
 
 The following arguments are supported by clonelab:
