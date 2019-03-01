@@ -18,7 +18,10 @@ def get_group(base_url, token_segment, namespace):
     final_url = base_url + 'groups?' + token_segment + "search=" + namespace
     r = requests.get(final_url)
     results = r.json()
-    
+    if r.status_code != 200:
+        print("Gitlab server returned an error response: " + r.text)
+        return None
+
     i = 0
     if len(results) > 1:
         print("Multiple group candidates found. Select the required candidate: ")
