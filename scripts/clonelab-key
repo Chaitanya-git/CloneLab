@@ -11,7 +11,20 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
 
-def add_user(tokenfile, argv):
+def update_tokenfile(tokenfile, tokens):
+    json_string = json.dumps(tokens)
+    tokenfile.seek(0)
+    tokenfile.write(json_string)
+    tokenfile.truncate()
+
+
+def encode_passphrase(passphrase):
+    digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
+    digest.update(bytearray(passphrase, 'utf-8'))
+    return base64.urlsafe_b64encode(digest.finalize())
+
+
+def add_user(tokens, argv):
     try:
         opts, args = getopt.getopt(argv, "u:t:", ["username=", "token="])
     except getopt.GetoptError as err:
@@ -21,15 +34,6 @@ def add_user(tokenfile, argv):
     username = ""
     token = ""
     passphrase = ""
-    json_string = tokenfile.read()
-    if json_string == "":
-        tokens = {}
-    else:
-        try:
-            tokens = json.loads(json_string)
-        except json.JSONDecodeError:
-            print("Error decoding configuration file")
-            return
 
     for opt, arg in opts:
         if opt == '-u' or opt == '--username':
@@ -49,27 +53,23 @@ def add_user(tokenfile, argv):
             print("passphrases do not match")
             passphrase = ""
 
-    digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
-    digest.update(bytearray(passphrase, 'utf-8'))
-    passphrase = base64.urlsafe_b64encode(digest.finalize())
+    passphrase = encode_passphrase(passphrase)
     token = bytes(token, 'utf-8')
 
     if username not in tokens:
         f = Fernet(passphrase)
         tokens[username] = f.encrypt(token).decode('utf-8')
+    else:
+        print("User already exists")
 
-    print(tokens)
-    json_string = json.dumps(tokens)
-    tokenfile.seek(0)
-    tokenfile.write(json_string)
-    tokenfile.truncate()
+    return tokens
 
 
-def update_passphrase(tokenfile, argv):
+def update_passphrase(tokens, argv):
     raise NotImplementedError
 
 
-def update_token(tokenfile, argv):
+def update_token(tokens, argv):
     raise NotImplementedError
 
 
@@ -109,19 +109,34 @@ def main(argv):
         except IOError:
             print("Error creating configuration file")
             return
+
     try:
         with open(tokenfile_path, "r+") as tokenfile:
+
+            json_string = tokenfile.read()
+            if json_string == "":
+                tokens = {}
+            else:
+                try:
+                    tokens = json.loads(json_string)
+                except json.JSONDecodeError:
+                    print("Error decoding configuration file")
+                    return
+
             if argv[0] == "add":
-                add_user(tokenfile, argv[1:])
+                tokens = add_user(tokens, argv[1:])
             elif argv[0] == "update-passphrase":
-                update_passphrase(tokenfile, argv[1:])
+                tokens = update_passphrase(tokens, argv[1:])
             elif argv[0] == "update-token":
-                update_token(tokenfile, argv[1:])
+                tokens = update_token(tokens, argv[1:])
             else:
                 print(
                     "Command: " + argv[0] + " not recognized by clonelab-key."
                 )
                 print_usage()
+
+            update_tokenfile(tokenfile, tokens)
+
     except IOError as err:
         print("Error opening configuration file: " + str(err))
         return
