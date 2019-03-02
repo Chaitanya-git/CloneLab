@@ -42,10 +42,10 @@ def add_user(tokens, argv):
             token = arg
 
     if username == "":
-        username = input("Enter username")
+        username = input("Enter username: ")
 
     if token == "":
-        token = input("Enter token")
+        token = input("Enter token: ")
 
     while passphrase == "":
         passphrase = getpass.getpass("Enter new passphrase: ")
@@ -80,23 +80,22 @@ def update_passphrase(tokens, argv):
             username = arg
 
     if username == "":
-        username = input("Enter username")
+        username = input("Enter username: ")
 
     passphrase = getpass.getpass("Enter passphrase: ")
-    digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
-    digest.update(bytearray(passphrase, 'utf-8'))
-    passphrase = base64.urlsafe_b64encode(digest.finalize())
+    passphrase = encode_passphrase(passphrase)
 
     if username in tokens:
         encrypted_token = bytes(tokens[username], 'utf-8')
         f = Fernet(passphrase)
         try:
-            token = f.decrypt(encrypted_token).decode('utf-8    ')
+            token = f.decrypt(encrypted_token).decode('utf-8')
         except InvalidToken:
             print("Invalid passphrase.")
             return tokens
     else:
         print("Username not recognized by Clonelab. Register user and api token using clonelab-key first.")
+        return tokens
 
     new_passphrase = ""
     while new_passphrase == "":
@@ -115,7 +114,44 @@ def update_passphrase(tokens, argv):
 
 
 def update_token(tokens, argv):
-    raise NotImplementedError
+    try:
+        opts, args = getopt.getopt(argv, "u:t:", ["username=", "token="])
+    except getopt.GetoptError as err:
+        print("Error: " + str(err))
+        return tokens
+
+    username = ""
+    token = ""
+
+    for opt, arg in opts:
+        if opt == '-u' or opt == '--username':
+            username = arg
+        elif opt == '-t' or opt == '--token':
+            token = arg
+
+    if username == "":
+        username = input("Enter username: ")
+
+    if token == "":
+        token = input("Enter token: ")
+
+    passphrase = getpass.getpass("Enter passphrase: ")
+    passphrase = encode_passphrase(passphrase)
+
+    if username in tokens:
+        encrypted_token = bytes(tokens[username], 'utf-8')
+        f = Fernet(passphrase)
+        try:
+            f.decrypt(encrypted_token).decode('utf-8')
+        except InvalidToken:
+            print("Invalid passphrase.")
+            return tokens
+        encrypted_token = f.encrypt(bytes(token, 'utf-8')).decode('utf-8')
+        tokens[username] = encrypted_token
+    else:
+        print("Username not recognized by Clonelab. Register user and api token using clonelab-key first.")
+
+    return tokens
 
 
 def print_usage():
@@ -174,6 +210,8 @@ def main(argv):
                 tokens = update_passphrase(tokens, argv[1:])
             elif argv[0] == "update-token":
                 tokens = update_token(tokens, argv[1:])
+            elif argv[0] == "help":
+                print_usage()
             else:
                 print(
                     "Command: " + argv[0] + " not recognized by clonelab-key."
