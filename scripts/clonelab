@@ -4,6 +4,8 @@ import subprocess
 import sys
 import requests
 import os
+import json
+from cryptography.fernet import Fernet, InvalidToken
 
 def print_usage():
     print("""Usage: clonelab [Optional parameters] <namspace search string> [git parameters]
@@ -60,12 +62,36 @@ def clone_group(base_url, token_segment, group, git_options, parent_dir="."):
         print("\nEntering group " + subgroup['name'])
         clone_group(base_url, token_segment, subgroup, git_options,  working_dir)
 
+def get_token_from_file(path):
+    print("Loading token from " + path)
+    try:
+        with open(os.path.expanduser(path)) as tokenfile:
+            token = ""
+            json_string = tokenfile.read()
+            tokens = json.loads(json_string)
+            username = input("Enter username: ")
+            passphrase = input("Enter passphrase: ")
+            if username in tokens:
+                encrypted_token = tokens[username]
+                f = Fernet(passphrase)
+                try:
+                    token = f.decrypt(passphrase)
+                except InvalidToken:
+                    print("Invalid passphrase. Unable to decrypt API token")
+            else:
+                print("Username not recognized by Clonelab. Register user and api token using clonelab-key first.")
+
+            return token
+    except IOError:
+        print("Unable to read config file.")
+        return ""
+
 
 def main(argv):
     opts = []
     args = []
     try:
-        opts, args = getopt.getopt(argv, "ht:d:", ["help", "token=", "dir="])
+        opts, args = getopt.getopt(argv, "hpt:d:", ["help", "token=", "dir="])
     except getopt.GetoptError as err:
         print("Error:" + str(err))
     
@@ -73,10 +99,14 @@ def main(argv):
     git_options = []
     base_url =  'https://gitlab.com/api/v4/'
     working_dir = "."
+    public_only = False
+
     for opt, arg in opts:
         if opt == '-h' or opt == '--help':
             print_usage()
             return
+        elif opt == '-p' or opt == '--public-only':
+            public_only = True
         elif opt == '-t' or opt == '--token':
             access_token = arg
         elif opt == '-d' or opt == '--dir':
@@ -89,8 +119,17 @@ def main(argv):
         return
 
     token_segment = ""
-    if access_token is not None:
-        token_segment = "private_token=" + access_token + "&"
+    tokenfile_path = '~/.config/clonelab/tokens'
+
+    if public_only == False:
+        if access_token is None:
+            access_token = get_token_from_file(tokenfile_path)
+
+        if access_token is not None:
+            token_segment = "private_token=" + access_token + "&"
+        else:
+            print("Reverting to searching public repos...")
+
 
     search_string = args[0]
     search_terms = search_string.split('/')

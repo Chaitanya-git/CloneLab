@@ -1,0 +1,67 @@
+#!/usr/bin/python3
+import getopt
+import os
+import sys
+import json
+
+from cryptography.fernet import Fernet, InvalidToken
+
+
+def add_user(tokenfile, argv):
+    raise NotImplementedError
+
+
+def update_passphrase(tokenfile, argv):
+    raise NotImplementedError
+
+
+def update_token(tokenfile, argv):
+    raise NotImplementedError
+
+
+def print_usage():
+    raise NotImplementedError
+
+
+def main(argv):
+    config_dir = "~/.config/clonelab/"
+    tokenfilename = "tokens"
+    tokenfile_path = config_dir + tokenfilename
+
+    if len(argv) == 0:
+        print_usage()
+
+    if not os.path.isfile(tokenfile_path):
+        print("Token file not found. Creating token file at " + tokenfile_path)
+        try:
+            os.makedirs(config_dir, exist_ok=True)
+        except IOError:
+            print("Error creating configuration directory")
+            return
+
+        try:
+            f = open(tokenfile_path, "w+")
+            f.close()
+        except IOError:
+            print("Error creating configuration file")
+            return
+    try:
+        with open(tokenfile_path) as tokenfile:
+            if argv[0] == "add":
+                add_user(tokenfile, argv[1:])
+            elif argv[0] == "update-passphrase":
+                update_passphrase(tokenfile, argv[1:])
+            elif argv[0] == "update-token":
+                update_token(tokenfile, argv[1:])
+            else:
+                print(
+                    "Command: " + argv[0] + " not recognized by clonelab-key."
+                )
+                print_usage()
+    except IOError:
+        print("Error opening configuration file")
+        return
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

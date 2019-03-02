@@ -3,3 +3,4 @@ token.txt
 dist/
 clonelab.egg-info/
 build/
+.idea/
