@@ -17,7 +17,7 @@ python3 setup.py sdist bdist_wheel
 This puts the built wheel package in the ```dist``` folder.
 Finally, install the wheel package using pip
 ```bash
-pip3 install --user dist/clonelab-0.0.3-py3-none-any.whl
+pip3 install --user dist/clonelab-0.1.0-py3-none-any.whl
 ```
 This should install the clonelab script in the ```.local/bin``` folder inside of your home folder. To be able to run clonelab from other directories, append ```~/.local/bin``` to your ```$PATH``` variable.
 To do so, run:
