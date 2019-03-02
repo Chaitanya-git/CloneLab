@@ -103,7 +103,7 @@ def main(argv):
     opts = []
     args = []
     try:
-        opts, args = getopt.getopt(argv, "hpt:d:", ["help", "token=", "dir="])
+        opts, args = getopt.getopt(argv, "hpt:d:", ["help", "public-only", "token=", "dir="])
     except getopt.GetoptError as err:
         print("Error:" + str(err))
     
