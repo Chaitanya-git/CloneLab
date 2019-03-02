@@ -5,7 +5,12 @@ import sys
 import requests
 import os
 import json
+import base64
+import getpass
+
 from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
 
 
 def print_usage():
@@ -73,20 +78,24 @@ def get_token_from_file(path):
             json_string = tokenfile.read()
             tokens = json.loads(json_string)
             username = input("Enter username: ")
-            passphrase = input("Enter passphrase: ")
+            passphrase = getpass.getpass("Enter passphrase: ")
+            digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
+            digest.update(bytearray(passphrase, 'utf-8'))
+            passphrase = base64.urlsafe_b64encode(digest.finalize())
+
             if username in tokens:
-                encrypted_token = tokens[username]
+                encrypted_token = bytes(tokens[username], 'utf-8')
                 f = Fernet(passphrase)
                 try:
-                    token = f.decrypt(encrypted_token)
+                    token = f.decrypt(encrypted_token).decode('utf-8    ')
                 except InvalidToken:
                     print("Invalid passphrase. Unable to decrypt API token")
             else:
                 print("Username not recognized by Clonelab. Register user and api token using clonelab-key first.")
 
             return token
-    except IOError:
-        print("Unable to read config file.")
+    except IOError as err:
+        print("Unable to read config file:" + str(err))
         return ""
 
 
