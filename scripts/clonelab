@@ -7,6 +7,7 @@ import os
 import json
 from cryptography.fernet import Fernet, InvalidToken
 
+
 def print_usage():
     print("""Usage: clonelab [Optional parameters] <namspace search string> [git parameters]
             Optional parameters:
@@ -15,6 +16,7 @@ def print_usage():
                 --help      -h      Print this usage help
             Options not recognized by clonelab will be passed on to git 
             """)
+
 
 def get_group(base_url, token_segment, namespace):
     final_url = base_url + 'groups?' + token_segment + "search=" + namespace
@@ -28,7 +30,7 @@ def get_group(base_url, token_segment, namespace):
     if len(results) > 1:
         print("Multiple group candidates found. Select the required candidate: ")
         for i, result in enumerate(results):
-            print("\t" + str(i) + ') '  + result['web_url'])
+            print("\t" + str(i) + ') ' + result['web_url'])
     
         i = int(input())
     
@@ -62,6 +64,7 @@ def clone_group(base_url, token_segment, group, git_options, parent_dir="."):
         print("\nEntering group " + subgroup['name'])
         clone_group(base_url, token_segment, subgroup, git_options,  working_dir)
 
+
 def get_token_from_file(path):
     print("Loading token from " + path)
     try:
@@ -75,7 +78,7 @@ def get_token_from_file(path):
                 encrypted_token = tokens[username]
                 f = Fernet(passphrase)
                 try:
-                    token = f.decrypt(passphrase)
+                    token = f.decrypt(encrypted_token)
                 except InvalidToken:
                     print("Invalid passphrase. Unable to decrypt API token")
             else:
@@ -97,7 +100,7 @@ def main(argv):
     
     access_token = None
     git_options = []
-    base_url =  'https://gitlab.com/api/v4/'
+    base_url = 'https://gitlab.com/api/v4/'
     working_dir = "."
     public_only = False
 
@@ -121,7 +124,7 @@ def main(argv):
     token_segment = ""
     tokenfile_path = '~/.config/clonelab/tokens'
 
-    if public_only == False:
+    if not public_only:
         if access_token is None:
             access_token = get_token_from_file(tokenfile_path)
 
@@ -129,7 +132,6 @@ def main(argv):
             token_segment = "private_token=" + access_token + "&"
         else:
             print("Reverting to searching public repos...")
-
 
     search_string = args[0]
     search_terms = search_string.split('/')
@@ -140,11 +142,9 @@ def main(argv):
     if not group:
         print("Group " + args[0] + " not found.")
         return
-    
-    
+
     clone_group(base_url, token_segment, group, git_options, working_dir)
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
