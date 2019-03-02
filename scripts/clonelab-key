@@ -74,7 +74,17 @@ def update_token(tokenfile, argv):
 
 
 def print_usage():
-    raise NotImplementedError
+    print("""
+        Usage: clonelab-key add/update-passphrase/update-token [Optional parameters]
+        
+        Optional parameters for add and update-token:
+            --username      -u      Username of the user
+            --token         -t      The api token for the user
+            
+        Optional parameters for update-passphrase:
+            --username      -u      Username of the user
+        
+    """)
 
 
 def main(argv):

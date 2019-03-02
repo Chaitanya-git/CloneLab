@@ -16,9 +16,10 @@ from cryptography.hazmat.backends import default_backend
 def print_usage():
     print("""Usage: clonelab [Optional parameters] <namspace search string> [git parameters]
             Optional parameters:
-                --token=    -t      Specify access token to access private repositories
-                --dir=      -d      Specify a different working directory to clone into
-                --help      -h      Print this usage help
+                --public-only   -p      Only search publicly available groups
+                --token=        -t      Specify access token to access private repositories
+                --dir=          -d      Specify a different working directory to clone into
+                --help          -h      Print this usage help
             Options not recognized by clonelab will be passed on to git 
             """)
 
