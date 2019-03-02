@@ -6,7 +6,7 @@ import json
 import getpass
 import base64
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
@@ -29,7 +29,7 @@ def add_user(tokens, argv):
         opts, args = getopt.getopt(argv, "u:t:", ["username=", "token="])
     except getopt.GetoptError as err:
         print("Error: " + str(err))
-        return
+        return tokens
 
     username = ""
     token = ""
@@ -66,7 +66,52 @@ def add_user(tokens, argv):
 
 
 def update_passphrase(tokens, argv):
-    raise NotImplementedError
+    try:
+        opts, args = getopt.getopt(argv, "u:", ["username="])
+    except getopt.GetoptError as err:
+        print("Error: " + str(err))
+        return tokens
+
+    username = ""
+    token = ""
+
+    for opt, arg in opts:
+        if opt == '-u' or opt == '--username':
+            username = arg
+
+    if username == "":
+        username = input("Enter username")
+
+    passphrase = getpass.getpass("Enter passphrase: ")
+    digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
+    digest.update(bytearray(passphrase, 'utf-8'))
+    passphrase = base64.urlsafe_b64encode(digest.finalize())
+
+    if username in tokens:
+        encrypted_token = bytes(tokens[username], 'utf-8')
+        f = Fernet(passphrase)
+        try:
+            token = f.decrypt(encrypted_token).decode('utf-8    ')
+        except InvalidToken:
+            print("Invalid passphrase.")
+            return tokens
+    else:
+        print("Username not recognized by Clonelab. Register user and api token using clonelab-key first.")
+
+    new_passphrase = ""
+    while new_passphrase == "":
+        new_passphrase = getpass.getpass("Enter new passphrase: ")
+        if new_passphrase != getpass.getpass("Enter passphrase again to confirm:"):
+            print("passphrases do not match")
+            new_passphrase = ""
+
+    new_passphrase = encode_passphrase(new_passphrase)
+    f = Fernet(new_passphrase)
+    token = bytes(token, 'utf-8')
+    encrypted_token = f.encrypt(token)
+    tokens[username] = encrypted_token.decode('utf-8')
+
+    return tokens
 
 
 def update_token(tokens, argv):
