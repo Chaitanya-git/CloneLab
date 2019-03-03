@@ -81,7 +81,7 @@ def get_token_from_file(path):
             username = input("Enter username: ")
             passphrase = getpass.getpass("Enter passphrase: ")
             digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-            digest.update(bytearray(passphrase, 'utf-8'))
+            digest.update(bytes(passphrase, 'utf-8'))
             passphrase = base64.urlsafe_b64encode(digest.finalize())
 
             if username in tokens:

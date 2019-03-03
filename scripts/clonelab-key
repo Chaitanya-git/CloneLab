@@ -20,7 +20,7 @@ def update_tokenfile(tokenfile, tokens):
 
 def encode_passphrase(passphrase):
     digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-    digest.update(bytearray(passphrase, 'utf-8'))
+    digest.update(bytes(passphrase, 'utf-8'))
     return base64.urlsafe_b64encode(digest.finalize())
 
 
