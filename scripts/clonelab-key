@@ -19,7 +19,7 @@ def update_tokenfile(tokenfile, tokens):
 
 
 def encode_passphrase(passphrase):
-    digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest.update(bytearray(passphrase, 'utf-8'))
     return base64.urlsafe_b64encode(digest.finalize())
 
@@ -169,9 +169,9 @@ def print_usage():
 
 
 def main(argv):
-    config_dir = "~/.config/clonelab/"
+    config_dir = os.path.expanduser("~/.config/clonelab/")
     tokenfilename = "tokens"
-    tokenfile_path = os.path.expanduser(config_dir) + tokenfilename
+    tokenfile_path = config_dir + tokenfilename
 
     if len(argv) == 0:
         print_usage()

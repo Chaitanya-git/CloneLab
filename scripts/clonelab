@@ -80,7 +80,7 @@ def get_token_from_file(path):
             tokens = json.loads(json_string)
             username = input("Enter username: ")
             passphrase = getpass.getpass("Enter passphrase: ")
-            digest = hashes.Hash(hashes.SHA3_256(), backend=default_backend())
+            digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
             digest.update(bytearray(passphrase, 'utf-8'))
             passphrase = base64.urlsafe_b64encode(digest.finalize())
 
